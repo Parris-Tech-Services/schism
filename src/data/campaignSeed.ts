@@ -1,4 +1,5 @@
 import type { Campaign, Scene } from '../types/story';
+export * from './campaignMapSeed';
 
 const now = new Date().toISOString();
 

@@ -1,4 +1,4 @@
-import type { GameState, Requirement, Effect, Choice } from '../types/story';
+import type { GameState, Requirement, Effect, Choice, StoryExit, StoryInteractable, StoryInteraction } from '../types/story';
 
 export function checkRequirement(req: Requirement, state: GameState): boolean {
   switch (req.type) {
@@ -90,7 +90,10 @@ export function applyEffect(effect: Effect, state: GameState): GameState {
       }
       break;
     case 'trigger_ending':
-      newState.flags = [...newState.flags, `ENDING_${effect.target}`];
+      const endFlag = `ENDING_${effect.target}`;
+      if (!newState.flags.includes(endFlag)) {
+        newState.flags = [...newState.flags, endFlag];
+      }
       break;
   }
   
@@ -112,4 +115,30 @@ export function getVisibleChoices(choices: Choice[], state: GameState): Choice[]
 
 export function isChoiceEnabled(choice: Choice, state: GameState): boolean {
   return areRequirementsMet(choice.requirements, state);
+}
+
+export function attemptMovement(direction: string, currentLocationId: string, state: GameState, exits: StoryExit[]): { success: boolean, newLocationId?: string, message?: string, effects?: Effect[] } {
+  const exit = exits.find(e => e.sourceLocationId === currentLocationId && e.direction === direction);
+  if (!exit) return { success: false, message: "You cannot go that way." };
+  
+  if (exit.hidden && !state.revealedExitIds.includes(exit.id)) {
+     return { success: false, message: "You cannot go that way." };
+  }
+  
+  if (exit.locked && !state.unlockedExitIds.includes(exit.id)) {
+     if (!areRequirementsMet(exit.requirements, state)) {
+        return { success: false, message: "That route is blocked or locked." };
+     }
+  }
+
+  return { success: true, newLocationId: exit.destinationLocationId, effects: exit.movementEffects };
+}
+
+export function resolveInteractable(targetStr: string, interactables: StoryInteractable[]): StoryInteractable | null {
+  for (const item of interactables) {
+    if (item.title.toLowerCase() === targetStr.toLowerCase() || (item.aliases || []).some(a => a.toLowerCase() === targetStr.toLowerCase())) {
+      return item;
+    }
+  }
+  return null;
 }

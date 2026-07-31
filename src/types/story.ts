@@ -71,11 +71,98 @@ export const CampaignSchema = z.object({
 });
 export type Campaign = z.infer<typeof CampaignSchema>;
 
+export const StoryMapSchema = z.object({
+  id: z.string(),
+  campaignId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  regionType: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  floor: z.string().optional(),
+  canonScope: z.string(),
+  version: z.number().optional()
+});
+export type StoryMap = z.infer<typeof StoryMapSchema>;
+
+export const StoryLocationSchema = z.object({
+  id: z.string(),
+  mapId: z.string(),
+  campaignId: z.string(),
+  title: z.string(),
+  shortLabel: z.string().optional(),
+  description: z.string(),
+  x: z.number(),
+  y: z.number(),
+  z: z.number().optional(),
+  linkedLoreEntryId: z.string().optional(),
+  entrySceneId: z.string().optional(),
+  icon: z.string().optional(),
+  hazardType: z.string().optional(),
+  canonScope: z.string(),
+  initiallyDiscovered: z.boolean().optional(),
+  initiallyVisited: z.boolean().optional()
+});
+export type StoryLocation = z.infer<typeof StoryLocationSchema>;
+
+export const StoryExitSchema = z.object({
+  id: z.string(),
+  mapId: z.string(),
+  sourceLocationId: z.string(),
+  destinationLocationId: z.string(),
+  direction: z.string(),
+  reverseDirection: z.string().optional(),
+  label: z.string().optional(),
+  hidden: z.boolean().optional(),
+  locked: z.boolean().optional(),
+  requirements: z.array(RequirementSchema).optional(),
+  movementEffects: z.array(EffectSchema).optional(),
+  canonScope: z.string()
+});
+export type StoryExit = z.infer<typeof StoryExitSchema>;
+
+export const StoryInteractionSchema = z.object({
+  verb: z.string(),
+  directObjectId: z.string(),
+  indirectObjectId: z.string().optional(),
+  requirements: z.array(RequirementSchema).optional(),
+  successText: z.string().optional(),
+  failureText: z.string().optional(),
+  effects: z.array(EffectSchema).optional(),
+  repeatBehaviour: z.string().optional(),
+  onceOnly: z.boolean().optional()
+});
+export type StoryInteraction = z.infer<typeof StoryInteractionSchema>;
+
+export const StoryInteractableSchema = z.object({
+  id: z.string(),
+  locationId: z.string(),
+  title: z.string(),
+  aliases: z.array(z.string()).optional(),
+  description: z.string(),
+  hidden: z.boolean().optional(),
+  discovered: z.boolean().optional(),
+  portable: z.boolean().optional(),
+  inventoryItemId: z.string().optional(),
+  availableVerbs: z.array(z.string()).optional(),
+  requirements: z.array(RequirementSchema).optional(),
+  interactions: z.array(StoryInteractionSchema).optional(),
+  canonScope: z.string()
+});
+export type StoryInteractable = z.infer<typeof StoryInteractableSchema>;
+
 export const GameStateSchema = z.object({
   id: z.string(),
   saveName: z.string().default('Autosave'),
   campaignId: z.string(),
   currentSceneId: z.string(),
+  currentMapId: z.string().optional(),
+  currentLocationId: z.string().optional(),
+  visitedLocationIds: z.array(z.string()).default([]),
+  discoveredLocationIds: z.array(z.string()).default([]),
+  revealedExitIds: z.array(z.string()).default([]),
+  unlockedExitIds: z.array(z.string()).default([]),
+  mapNotes: z.record(z.string(), z.string()).default({}),
   playerCharacterId: z.string(),
   inventory: z.array(z.string()).default([]),
   flags: z.array(z.string()).default([]),

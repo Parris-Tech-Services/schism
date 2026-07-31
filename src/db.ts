@@ -1,12 +1,12 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type {
   CanonDecision, ConstraintRule, LoreEntry, ModuleType, Project, Relationship, Revision, Snapshot, SourceDocument, TimelineEvent, WorldQuestion, WritingNote,
-  Campaign, Scene, GameState
+  Campaign, Scene, GameState, StoryMap, StoryLocation, StoryExit, StoryInteractable
 } from './types';
 import {
   seedDecisions, seedEntries, seedModuleTypes, seedProject, seedQuestions, seedRelationships, seedRules, seedSource, seedTimeline, seedWritingNotes
 } from './data/seed';
-import { campaignSeed, scenesSeed } from './data/campaignSeed';
+import { campaignSeed, scenesSeed, storyMapsSeed, storyLocationsSeed, storyExitsSeed, storyInteractablesSeed } from './data/campaignSeed';
 
 export class SchismDatabase extends Dexie {
   projects!: EntityTable<Project, 'id'>;
@@ -24,6 +24,10 @@ export class SchismDatabase extends Dexie {
   campaigns!: EntityTable<Campaign, 'id'>;
   scenes!: EntityTable<Scene, 'id'>;
   saves!: EntityTable<GameState, 'id'>;
+  storyMaps!: EntityTable<StoryMap, 'id'>;
+  storyLocations!: EntityTable<StoryLocation, 'id'>;
+  storyExits!: EntityTable<StoryExit, 'id'>;
+  storyInteractables!: EntityTable<StoryInteractable, 'id'>;
 
   constructor() {
     super('schism-codex');
@@ -49,6 +53,13 @@ export class SchismDatabase extends Dexie {
     }).upgrade(() => {
       // safe upgrade path, Dexie creates tables automatically.
     });
+
+    this.version(3).stores({
+      storyMaps: 'id, campaignId',
+      storyLocations: 'id, mapId, campaignId',
+      storyExits: 'id, mapId, sourceLocationId, destinationLocationId',
+      storyInteractables: 'id, locationId'
+    }).upgrade(() => {});
   }
 }
 
@@ -83,9 +94,13 @@ export async function initialiseDatabase(): Promise<void> {
   // Idempotently seed campaigns
   const cCount = await db.campaigns.where('id').equals(campaignSeed.id).count();
   if (cCount === 0) {
-    await db.transaction('rw', [db.campaigns, db.scenes], async () => {
+    await db.transaction('rw', [db.campaigns, db.scenes, db.storyMaps, db.storyLocations, db.storyExits, db.storyInteractables], async () => {
       await db.campaigns.add(campaignSeed);
       await db.scenes.bulkAdd(scenesSeed);
+      await db.storyMaps.bulkAdd(storyMapsSeed);
+      await db.storyLocations.bulkAdd(storyLocationsSeed);
+      await db.storyExits.bulkAdd(storyExitsSeed);
+      await db.storyInteractables.bulkAdd(storyInteractablesSeed);
     });
   }
 }

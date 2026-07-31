@@ -5,13 +5,17 @@ import { db } from '../db';
 import { PageHeader } from '../components/PageHeader';
 import type { Scene, Campaign } from '../types/story';
 import { Download, Upload, Copy, Play, CheckCircle, AlertTriangle } from 'lucide-react';
+import { CommandTester } from '../components/CommandTester';
 
 export function StoryAuthorPage() {
   const data = useLiveQuery(async () => {
     const campaigns = await db.campaigns.toArray();
     const scenes = await db.scenes.toArray();
     const entries = await db.entries.toArray();
-    return { campaigns, scenes, entries };
+    const maps = await db.storyMaps.toArray();
+    const locations = await db.storyLocations.toArray();
+    const exits = await db.storyExits.toArray();
+    return { campaigns, scenes, entries, maps, locations, exits };
   }, []);
 
   const [activeCampaignId, setActiveCampaignId] = useState('echoes_of_node_04');
@@ -19,6 +23,9 @@ export function StoryAuthorPage() {
   
   const campaign = data?.campaigns.find(c => c.id === activeCampaignId);
   const scenes = useMemo(() => data?.scenes.filter(s => s.campaignId === activeCampaignId) || [], [data, activeCampaignId]);
+  const maps = data?.maps.filter(m => m.campaignId === activeCampaignId) || [];
+  const locations = data?.locations.filter(l => l.campaignId === activeCampaignId) || [];
+  const exits = data?.exits || [];
 
   const nodes: Node[] = useMemo(() => {
     return scenes.map((scene, i) => ({
@@ -101,6 +108,48 @@ export function StoryAuthorPage() {
       });
     });
 
+    // MAP VALIDATION
+    const mapIds = new Set<string>();
+    maps.forEach(m => {
+      if (mapIds.has(m.id)) logs.push(`ERROR: Duplicate map ID '${m.id}'.`);
+      mapIds.add(m.id);
+    });
+
+    const locIds = new Set<string>();
+    locations.forEach(l => {
+      if (locIds.has(l.id)) logs.push(`ERROR: Duplicate location ID '${l.id}'.`);
+      locIds.add(l.id);
+      
+      if (!maps.find(m => m.id === l.mapId)) logs.push(`ERROR: Location '${l.id}' references missing map '${l.mapId}'.`);
+      
+      if (l.entrySceneId && !scenes.find(s => s.id === l.entrySceneId)) {
+         logs.push(`ERROR: Location '${l.id}' references missing scene '${l.entrySceneId}'.`);
+      }
+      
+      if (l.linkedLoreEntryId && !data?.entries.find(e => e.id === l.linkedLoreEntryId)) {
+         logs.push(`ERROR: Location '${l.id}' references missing lore entry '${l.linkedLoreEntryId}'.`);
+      }
+
+      // Find exits from this location
+      const locExits = exits.filter(e => e.sourceLocationId === l.id);
+      const dirs = new Set<string>();
+      locExits.forEach(e => {
+         if (dirs.has(e.direction)) {
+            logs.push(`ERROR: Location '${l.id}' has multiple exits in direction '${e.direction}'.`);
+         }
+         dirs.add(e.direction);
+         if (!locations.find(dest => dest.id === e.destinationLocationId)) {
+            logs.push(`ERROR: Exit '${e.id}' points to missing destination '${e.destinationLocationId}'.`);
+         }
+         
+         // Check reverse exits for one-way logic if we wanted to be strict
+         const reverse = exits.find(rev => rev.sourceLocationId === e.destinationLocationId && rev.destinationLocationId === l.id);
+         if (!reverse) {
+            logs.push(`WARNING: Route '${e.sourceLocationId}' to '${e.destinationLocationId}' is one-way. Ensure this is intentional.`);
+         }
+      });
+    });
+
     if (logs.length === 0) logs.push("SUCCESS: Campaign passed all validation checks.");
     setValidationLog(logs);
   }
@@ -180,6 +229,8 @@ export function StoryAuthorPage() {
               </ul>
             )}
           </section>
+          
+          <CommandTester />
         </div>
       </div>
     </>
