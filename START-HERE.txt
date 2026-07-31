@@ -1,0 +1,17 @@
+SCHISM CODEX — START HERE
+
+1. Install Node.js 20 or newer from the official Node.js website.
+2. Open a terminal inside this folder.
+3. Run:
+
+   npm install
+   npm run dev
+
+4. Open the local address printed in the terminal.
+
+Your lore is stored locally in this browser using IndexedDB. Use Settings & Backup to download a .schism.json backup.
+
+Other commands:
+   npm run build
+   npm run test
+   npm run preview
