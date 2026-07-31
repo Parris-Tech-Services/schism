@@ -233,3 +233,5 @@ export interface ContradictionWarning {
   entryIds: string[];
   severity: 'high' | 'medium' | 'low';
 }
+
+export * from './types/story';

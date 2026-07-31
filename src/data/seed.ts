@@ -44,7 +44,8 @@ export const seedModuleTypes: ModuleType[] = [
   mt('mystery', 'Mystery', 'Mysteries', 'CircleHelp', '#f1dc77', 'Unknowns that shape story and worldbuilding.'),
   mt('theme', 'Theme', 'Themes', 'MessageSquareQuote', '#d8fff0', 'Moral and thematic questions.'),
   mt('terminology', 'Terminology', 'Terminology', 'Braces', '#a9afb8', 'Named concepts and vocabulary.'),
-  mt('decision', 'Canon decision', 'Canon decisions', 'LockKeyhole', '#ffbe72', 'Author-level decisions and their consequences.')
+  mt('decision', 'Canon decision', 'Canon decisions', 'LockKeyhole', '#ffbe72', 'Author-level decisions and their consequences.'),
+  mt('map_node', 'Map Node', 'Map Nodes', 'Map', '#8fd7bd', 'Nodes that define geography on the map.')
 ];
 
 const entry = (

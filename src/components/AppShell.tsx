@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Activity, BookOpen, BrainCircuit, Cable, ChevronsLeft, CircleHelp, Clock3, DatabaseBackup, FilePenLine, GitBranch,
-  LayoutDashboard, Library, Map, Menu, Search, Settings, ShieldAlert, SlidersHorizontal, X
+  LayoutDashboard, Library, Map, MapPin, Menu, Search, Settings, ShieldAlert, SlidersHorizontal, X, Gamepad2, PenTool
 } from 'lucide-react';
 import clsx from 'clsx';
 import { db } from '../db';
@@ -15,16 +15,20 @@ const nav = [
   ['/timeline', 'Timeline', Clock3],
   ['/relationships', 'Relationship Map', GitBranch],
   ['/city', 'City Structure', Map],
+  ['/map', 'Geographic Map', MapPin],
   ['/rules', 'Rules Engine', SlidersHorizontal],
   ['/questions', 'Questions', CircleHelp],
   ['/contradictions', 'Contradictions', ShieldAlert],
   ['/writing', 'Writing Room', FilePenLine],
+  ['/story', 'Story Mode', Gamepad2],
+  ['/story-author', 'Story Author', PenTool],
   ['/assistant', 'AI Context', BrainCircuit],
   ['/settings', 'Settings & Backup', DatabaseBackup]
 ] as const;
 
 export function AppShell() {
   const [collapsed, setCollapsed] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -60,18 +64,21 @@ export function AppShell() {
       </nav>
       <div className="border-t border-white/10 p-3">
         {!collapsed && <div className="mb-3 rounded-xl bg-white/[0.035] p-3"><div className="eyebrow">Current project</div><div className="mt-1 truncate text-sm font-medium text-slate-200">{project?.name ?? 'Loading…'}</div><div className="mt-1 text-xs text-slate-500">{entries.length} lore entries</div></div>}
-        <button onClick={() => setCollapsed((value) => !value)} className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-500 hover:bg-white/5 hover:text-white"><ChevronsLeft size={17} className={clsx('transition', collapsed && 'rotate-180')} />{!collapsed && 'Collapse'}</button>
+        <div className="flex gap-1">
+          <button onClick={() => setCollapsed((value) => !value)} className="flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-500 hover:bg-white/5 hover:text-white" title="Collapse"><ChevronsLeft size={17} className={clsx('transition', collapsed && 'rotate-180')} />{!collapsed && 'Collapse'}</button>
+          <button onClick={() => setSidebarVisible(false)} className="flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-500 hover:bg-white/5 hover:text-white" title="Hide Sidebar"><X size={17} />{!collapsed && 'Hide'}</button>
+        </div>
       </div>
     </aside>
   );
 
   return (
     <div className="flex min-h-screen bg-transparent text-slate-100">
-      <div className="fixed inset-y-0 left-0 z-40 hidden lg:block">{side}</div>
+      <div className={clsx("fixed inset-y-0 left-0 z-40 hidden lg:block", !sidebarVisible && "!hidden")}>{side}</div>
       {mobileOpen && <><div className="fixed inset-0 z-40 bg-black/70 lg:hidden" onClick={() => setMobileOpen(false)} /><div className="fixed inset-y-0 left-0 z-50 lg:hidden">{side}</div></>}
-      <div className={clsx('min-w-0 flex-1 transition-all', collapsed ? 'lg:pl-[78px]' : 'lg:pl-[248px]')}>
+      <div className={clsx('min-w-0 flex-1 transition-all', sidebarVisible ? (collapsed ? 'lg:pl-[78px]' : 'lg:pl-[248px]') : 'lg:pl-0')}>
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-white/10 bg-[#07110f]/85 px-4 backdrop-blur-xl md:px-6">
-          <button className="button-secondary !p-2 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu"><Menu size={19} /></button>
+          <button className={clsx("button-secondary !p-2", sidebarVisible ? "lg:hidden" : "")} onClick={() => { if (window.innerWidth >= 1024) setSidebarVisible(true); else setMobileOpen(true); }} aria-label="Open menu"><Menu size={19} /></button>
           <button onClick={() => setPaletteOpen(true)} className="flex min-w-0 max-w-xl flex-1 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-left text-sm text-slate-500 hover:border-white/20"><Search size={17} /><span className="truncate">Search all lore, aliases, tags and notes…</span><span className="ml-auto hidden rounded-md border border-white/10 px-1.5 py-0.5 font-mono text-[10px] sm:inline">Ctrl K</span></button>
           <div className="ml-auto flex items-center gap-2"><span className="hidden items-center gap-1.5 rounded-full border border-emerald-300/15 bg-emerald-300/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-200 sm:flex"><Activity size={12} /> IndexedDB online</span><NavLink to="/settings" className="button-secondary !p-2" aria-label="Settings"><Settings size={18} /></NavLink></div>
         </header>
