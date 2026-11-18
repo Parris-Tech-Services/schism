@@ -1,0 +1,67 @@
+{
+  "_status": "DRAFT, not canon. Derived from AGENTS.md and World Bible v1.0.",
+  "world": "The Analog Schism",
+  "reserved_canon": [
+    "Custodian",
+    "The Blight",
+    "The Grey Hour",
+    "Concord Five",
+    "The Crown",
+    "The Midstack",
+    "The Works",
+    "The Sub-Tiers",
+    "Dead Grid",
+    "Node 04",
+    "Mara Venn",
+    "Adrian Rook",
+    "Adrian Venn",
+    "Priya Osei",
+    "Halcyon Systems",
+    "Vireo Biomed",
+    "Ferrous Works Authority",
+    "Aldergate Media & Education",
+    "Thorne Logistics",
+    "The Archivists",
+    "The Cradle Faithful",
+    "The Cut",
+    "The Splice Councils"
+  ],
+  "deprecated_do_not_use": [
+    "Veyra",
+    "ORISON",
+    "Triune Board",
+    "Night of Mirrors",
+    "Floodline",
+    "Vestrium",
+    "Civic Score",
+    "Dead Grid as a lowest physical layer"
+  ],
+  "naming": {
+    "people": "one given name, one surname, one family one surname; no generator pool approved yet",
+    "orgs": "one evocative word + plain function noun",
+    "factions": "The + role or craft noun",
+    "places": "physical position or function"
+  },
+  "avoid": [
+    "Elara",
+    "Theron",
+    "Mira",
+    "Aldric",
+    "Kael",
+    "Lyra",
+    "Seraphina",
+    "Voss"
+  ],
+  "banned_words": [
+    "tapestry",
+    "testament",
+    "delve",
+    "echo",
+    "whisper",
+    "neon-soaked"
+  ],
+  "needs_josh": [
+    "people phonology (Crown vs Sub-Tier)",
+    "whether to generate minor names at all"
+  ]
+}
